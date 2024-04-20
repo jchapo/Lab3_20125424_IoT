@@ -22,7 +22,7 @@ public class worker extends Worker {
     public Result doWork() {
 
         int contador = getInputData().getInt("numero",0);
-        int contadorFinal = contador + 10;
+        int contadorFinal = contador + 998;
 
         while (contador <= contadorFinal) {
 
