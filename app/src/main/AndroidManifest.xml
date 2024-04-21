@@ -17,10 +17,14 @@
         android:theme="@style/Theme.Lab3_IoT_20125424"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".MainActivity3"
+            android:exported="false" />
+
         <service
             android:name=".services.PrimeNumberService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity2"

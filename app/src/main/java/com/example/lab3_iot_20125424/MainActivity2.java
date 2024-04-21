@@ -36,17 +36,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity2 extends AppCompatActivity {
 
     private ActivityMain2Binding binding;
-    PrimeNumberService primeNumberService;
-    int ascender = 1;
-    int pausar = 0;
+    private PrimeNumberService primeNumberService;
+    private ExecutorService executorService;
     List<DtoPrime> primes;
-    ExecutorService executorService;
-
     private boolean isPaused = false;
-
+    private boolean isAscending = true; // Variable para controlar la dirección del contador
     private int contadorValue = 0; // Variable para almacenar el valor del contador
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,16 +84,13 @@ public class MainActivity2 extends AppCompatActivity {
                 startOrResumeThread(contadorViewModel);
 
                 binding.btnAscenderDescender.setOnClickListener(view1 -> {
-                    if (isPaused) {
-                        binding.btnAscenderDescender.setText("Descender");
-                        isPaused = false;
-                        // Reanudar el hilo cuando se presiona el botón de ascender/descender
-                        startOrResumeThread(contadorViewModel);
-                    } else {
-                        binding.btnAscenderDescender.setText("Ascender");
-                        isPaused = true;
-                        executorService.shutdownNow(); // Detener el hilo cuando se presiona el botón de ascender/descender
-                    }
+                    isAscending = !isAscending;
+                    binding.btnAscenderDescender.setText(isAscending ? "Descender" : "Ascender");
+                    executorService.shutdownNow();
+                    isPaused = true;
+                    executorService.shutdownNow();
+                    isPaused = false;
+                    startOrResumeThread(contadorViewModel);
                 });
 
                 binding.btnPausarReiniciar.setOnClickListener(view3 -> {
@@ -108,11 +100,15 @@ public class MainActivity2 extends AppCompatActivity {
                         isPaused = false;
                         // Reanudar el hilo cuando se presiona el botón de pausar/reiniciar
                         startOrResumeThread(contadorViewModel);
+                        Log.d("Juan","entra primero a boton pausar");
                     } else {
                         binding.btnPausarReiniciar.setText("Reiniciar");
                         binding.btnAscenderDescender.setVisibility(View.INVISIBLE);
                         isPaused = true;
-                        executorService.shutdownNow(); // Detener el hilo cuando se presiona el botón de pausar/reiniciar
+                        // Detener el hilo cuando se presiona el botón de pausar/reiniciar
+                        executorService.shutdownNow();
+                        Log.d("Juan","entra segundo a boton pausar");
+
                     }
                 });
 
@@ -135,8 +131,17 @@ public class MainActivity2 extends AppCompatActivity {
         executorService = Executors.newSingleThreadExecutor();
 
         executorService.execute(() -> {
-            for (int i = contadorValue; i <= 999 && !isPaused; i++) {
+            int step = isAscending ? 1 : -1; // Dirección del contador
+            for (int i = contadorValue; (isAscending ? (i <= 999 && !isPaused) : (i >= 0 && !isPaused)); i += step) {
                 contadorViewModel.getContador().postValue(i);
+
+                // Ajustar el contador según la dirección y los límites
+                if (isAscending && i == 998) {
+                    i = -1; // Reiniciar el contador a 0 si está en modo ascendente y alcanza 998
+                } else if (!isAscending && i == 0) {
+                    i = 999; // Reiniciar el contador a 998 si está en modo descendente y alcanza 0
+                }
+
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -156,15 +161,16 @@ public class MainActivity2 extends AppCompatActivity {
 
         return tieneInternet;
     }
-    public void fetchPrimeFromWs(){
-        if(tengoInternet()){
-            primeNumberService.getPrimes(999,1).enqueue(new Callback<List<DtoPrime>>() {
+
+    public void fetchPrimeFromWs() {
+        if (tengoInternet()) {
+            primeNumberService.getPrimes(999, 1).enqueue(new Callback<List<DtoPrime>>() {
                 @Override
                 public void onResponse(Call<List<DtoPrime>> call, Response<List<DtoPrime>> response) {
-                    if(response.isSuccessful()){
+                    if (response.isSuccessful()) {
                         primes = response.body();
                         // Verificar si la lista de primos se ha obtenido correctamente
-                        if(primes != null && !primes.isEmpty()) {
+                        if (primes != null && !primes.isEmpty()) {
                             // La lista de primos se ha obtenido correctamente, puedes hacer lo que necesites con ella aquí
                             // Por ejemplo, mostrarla en la vista, etc.
                             Log.d("msg-test", "Lista de primos obtenida correctamente");
@@ -177,6 +183,7 @@ public class MainActivity2 extends AppCompatActivity {
                         Log.d("msg-test", "Respuesta no exitosa al obtener primos: " + response.message());
                     }
                 }
+
                 @Override
                 public void onFailure(Call<List<DtoPrime>> call, Throwable t) {
                     t.printStackTrace();

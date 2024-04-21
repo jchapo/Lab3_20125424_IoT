@@ -92,12 +92,13 @@
         android:orientation="horizontal">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textBuscadorPelicula"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_margin="16dp"
+            android:layout_weight="1"
             android:hint="IdPelicula (IMDb)"
-            android:padding="8dp"/>
+            android:padding="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"

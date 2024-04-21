@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 public class ContadorViewModel extends ViewModel {
 
     private final MutableLiveData<Integer> contador = new MutableLiveData<>();
-    private final MutableLiveData<Integer> numeroprimo = new MutableLiveData<>();
 
     public MutableLiveData<Integer> getContador() {
         return contador;
