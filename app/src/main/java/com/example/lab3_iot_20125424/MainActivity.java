@@ -45,19 +45,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
 
-        Boolean hayInternet = tengoInternet();
+        boolean hayInternet = tengoInternet();
         if(hayInternet){
             Toast.makeText(MainActivity.this, "Conexión a Internet establecida", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(MainActivity.this, "Conexión a Internet no disponible", Toast.LENGTH_LONG).show();
         }
-        binding.btnVisualizar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-                startActivity(intent);
-            }
-        });
 
         omdbService = new Retrofit.Builder()
                 .baseUrl("https://www.omdbapi.com")
@@ -65,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
                 .build()
                 .create(OMDBService.class);
 
-        binding.btnBuscar.setOnClickListener(view -> fetchMovieDetailsWs());
+        binding.btnBuscar.setOnClickListener(view -> {
+            showToast("vista MainActivity3");
+            fetchMovieDetailsWs();
+        });
 
         primeNumberService = new Retrofit.Builder()
                 .baseUrl("https://prime-number-api.onrender.com")
@@ -127,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("titulo", titulo);
                         intent.putExtra("rating_rotten_tomatoes", ratingRottenTomatoes);
                         intent.putExtra("rating_metacritic", ratingMetacritic);
-
+                        Toast.makeText(MainActivity.this, "Vista MainActivity3", Toast.LENGTH_LONG).show();
                         startActivity(intent);
                     }
                 }
@@ -154,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                         // Crear el Intent y pasar la cadena de primos como extra
                         Intent intent = new Intent(MainActivity.this, MainActivity2.class);
                         intent.putExtra("primesAsString", primesAsString);
+                        Toast.makeText(MainActivity.this, "Vista MainActivity2", Toast.LENGTH_LONG).show();
                         startActivity(intent);
                     } else {
                         Log.d("msg-test", "Respuesta no exitosa al obtener primos: " + response.message());
@@ -170,14 +167,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Método para convertir la lista de DtoPrime a una cadena de texto
-    private String convertDtoPrimesToString(List<DtoPrime> primes) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (DtoPrime prime : primes) {
-            stringBuilder.append(prime.toString()).append("\n");
-        }
-        return stringBuilder.toString();
+    private void showToast(String message) {
+        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
     }
-
 
     public boolean tengoInternet() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

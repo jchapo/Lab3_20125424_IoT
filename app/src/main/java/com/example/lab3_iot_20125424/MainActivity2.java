@@ -100,6 +100,8 @@ public class MainActivity2 extends AppCompatActivity {
                 int step = isAscending ? 1 : -1; // Dirección del contador
                 for (int i = contadorValue; (isAscending ? (i <= 999 && !isPaused) : (i >= 0 && !isPaused)); i += step) {
                     contadorViewModel.getContador().postValue(i);
+                    Log.d("MainActivity2", "Valor del contador: " + i);
+
 
                     // Ajustar el contador según la dirección y los límites
                     if (isAscending && i == 998) {
@@ -186,6 +188,8 @@ public class MainActivity2 extends AppCompatActivity {
             int step = isAscending ? 1 : -1; // Dirección del contador
             for (int i = contadorValue; (isAscending ? (i <= 999 && !isPaused) : (i >= 0 && !isPaused)); i += step) {
                 contadorViewModel.getContador().postValue(i);
+                Log.d("MainActivity2", "Valor del contador: " + i);
+
 
                 // Ajustar el contador según la dirección y los límites
                 if (isAscending && i == 998) {
@@ -211,4 +215,6 @@ public class MainActivity2 extends AppCompatActivity {
         Type listType = new TypeToken<List<DtoPrime>>(){}.getType();
         return gson.fromJson(primesAsString, listType);
     }
+
+
 }
