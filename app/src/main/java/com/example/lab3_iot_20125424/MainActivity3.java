@@ -13,7 +13,7 @@ public class MainActivity3 extends AppCompatActivity {
     private TextView txtGenero;
     private TextView txtIMDB;
     private TextView txtRottenTomatoes;
-    private TextView txtMetacritic, txtEscritores, txtTrama;
+    private TextView txtMetacritic, txtEscritores, txtTrama,titulo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +30,7 @@ public class MainActivity3 extends AppCompatActivity {
         txtRottenTomatoes = findViewById(R.id.txtRottenTomatoes);
         txtMetacritic = findViewById(R.id.txtMetacritic);
         txtTrama = findViewById(R.id.txtTramaPelicula);
+        titulo = findViewById(R.id.titulo);
 
 
         // Obtener los extras del Intent
@@ -45,6 +46,7 @@ public class MainActivity3 extends AppCompatActivity {
             txtRottenTomatoes.setText(extras.getString("rating_rotten_tomatoes"));
             txtMetacritic.setText(extras.getString("rating_metacritic"));
             txtTrama.setText(extras.getString("trama"));
+            titulo.setText(extras.getString("titulo"));
         }
     }
 }

@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     if(response.isSuccessful()){
                         DtoMovie dtoMovie = response.body();
                         String actores = dtoMovie.getActors();
+                        String titulo = dtoMovie.getTitle();
                         String director = dtoMovie.getDirector();
                         String fechaEstreno = dtoMovie.getReleased();
                         String generos = dtoMovie.getGenre();
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("escritores", escritores);
                         intent.putExtra("trama", trama);
                         intent.putExtra("rating_imdb", ratingIMDB);
+                        intent.putExtra("titulo", titulo);
                         intent.putExtra("rating_rotten_tomatoes", ratingRottenTomatoes);
                         intent.putExtra("rating_metacritic", ratingMetacritic);
 
