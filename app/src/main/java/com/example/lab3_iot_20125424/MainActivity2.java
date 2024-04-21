@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +40,12 @@ public class MainActivity2 extends AppCompatActivity {
     int ascender = 1;
     int pausar = 0;
     List<DtoPrime> primes;
+    ExecutorService executorService;
+
+    private boolean isPaused = false;
+
+    private int contadorValue = 0; // Variable para almacenar el valor del contador
+
 
 
     @Override
@@ -57,38 +64,55 @@ public class MainActivity2 extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.btnIniciarPrimo.setOnClickListener(view -> {
-            if (tengoInternet()) { // Verifica si hay conexión a Internet
+            if (tengoInternet()) {
                 Toast.makeText(MainActivity2.this, "Conexión a Internet establecida", Toast.LENGTH_SHORT).show();
 
                 binding.layoutBoton.setVisibility(View.GONE);
                 binding.layoutMostrarPrimo.setVisibility(View.VISIBLE);
 
-                // Usando ExecutorService
                 ApplicationThreads application = (ApplicationThreads) getApplication();
-                ExecutorService executorService = application.executorService;
-                // **********************
+                executorService = application.executorService;
 
                 ContadorViewModel contadorViewModel =
                         new ViewModelProvider(MainActivity2.this).get(ContadorViewModel.class);
 
                 contadorViewModel.getContador().observe(this, contador -> {
-                    //aquí o2
-                    String primotexto = String.valueOf(contador+1);
+                    contadorValue = contador; // Almacenar el valor del contador
+                    String primotexto = String.valueOf(contador + 1);
                     binding.textViewOrdenPrimo.setText("El primo número " + primotexto + " es:");
                     DtoPrime primoDeOrden = primes.get(contador);
                     String primoTextoDeOrden = String.valueOf(primoDeOrden.getNumber());
                     binding.textViewMostrarPrimo.setText(primoTextoDeOrden);
                 });
 
-                executorService.execute(() -> {
-                    for (int i = 0; i <= 999; i++) {
-                        contadorViewModel.getContador().postValue(i); // o1
-                        //Log.d("msg-test", "i: " + i);
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+                // Iniciar un nuevo hilo o reanudar el hilo existente
+                startOrResumeThread(contadorViewModel);
+
+                binding.btnAscenderDescender.setOnClickListener(view1 -> {
+                    if (isPaused) {
+                        binding.btnAscenderDescender.setText("Descender");
+                        isPaused = false;
+                        // Reanudar el hilo cuando se presiona el botón de ascender/descender
+                        startOrResumeThread(contadorViewModel);
+                    } else {
+                        binding.btnAscenderDescender.setText("Ascender");
+                        isPaused = true;
+                        executorService.shutdownNow(); // Detener el hilo cuando se presiona el botón de ascender/descender
+                    }
+                });
+
+                binding.btnPausarReiniciar.setOnClickListener(view3 -> {
+                    if (isPaused) {
+                        binding.btnPausarReiniciar.setText("Pausar");
+                        binding.btnAscenderDescender.setVisibility(View.VISIBLE);
+                        isPaused = false;
+                        // Reanudar el hilo cuando se presiona el botón de pausar/reiniciar
+                        startOrResumeThread(contadorViewModel);
+                    } else {
+                        binding.btnPausarReiniciar.setText("Reiniciar");
+                        binding.btnAscenderDescender.setVisibility(View.INVISIBLE);
+                        isPaused = true;
+                        executorService.shutdownNow(); // Detener el hilo cuando se presiona el botón de pausar/reiniciar
                     }
                 });
 
@@ -96,33 +120,31 @@ public class MainActivity2 extends AppCompatActivity {
                 Toast.makeText(MainActivity2.this, "No hay conexión a Internet", Toast.LENGTH_SHORT).show();
             }
         });
-
-        binding.btnAscenderDescender.setOnClickListener(view -> {
-            if (ascender == 1) {
-                binding.btnAscenderDescender.setText("Ascender");
-                ascender = 0;
-            } else {
-                binding.btnAscenderDescender.setText("Descender");
-                ascender = 1;
-            }
-
-        });
-
-        binding.btnPausarReiniciar.setOnClickListener(view -> {
-            if (pausar == 0) {
-                binding.btnPausarReiniciar.setText("Reiniciar");
-                binding.btnAscenderDescender.setVisibility(view.INVISIBLE);
-                pausar = 1;
-            } else {
-                binding.btnPausarReiniciar.setText("Pausar");
-                binding.btnAscenderDescender.setVisibility(view.VISIBLE);
-                pausar = 0;
-            }
-
-        });
-
     }
 
+    private void startOrResumeThread(ContadorViewModel contadorViewModel) {
+        if (isPaused) {
+            return; // No hacer nada si el hilo está pausado
+        }
+
+        // Detener el hilo anterior si existe
+        if (executorService != null) {
+            executorService.shutdownNow();
+        }
+
+        executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            for (int i = contadorValue; i <= 999 && !isPaused; i++) {
+                contadorViewModel.getContador().postValue(i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     public boolean tengoInternet() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
