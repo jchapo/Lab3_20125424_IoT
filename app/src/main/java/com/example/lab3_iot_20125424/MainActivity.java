@@ -3,18 +3,23 @@ package com.example.lab3_iot_20125424;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lab3_iot_20125424.databinding.ActivityMain3Binding;
 import com.example.lab3_iot_20125424.databinding.ActivityMainBinding;
 import com.example.lab3_iot_20125424.dto.DtoMovie;
+import com.example.lab3_iot_20125424.dto.DtoPrime;
 import com.example.lab3_iot_20125424.dto.DtoRatings;
 import com.example.lab3_iot_20125424.services.OMDBService;
+import com.example.lab3_iot_20125424.services.PrimeNumberService;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -29,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     OMDBService omdbService;
+    private PrimeNumberService primeNumberService;
+    List<DtoPrime> primes;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +44,13 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
+        Boolean hayInternet = tengoInternet();
+        if(hayInternet){
+            Toast.makeText(MainActivity.this, "Conexión a Internet establecida", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(MainActivity.this, "Conexión a Internet no disponible", Toast.LENGTH_LONG).show();
+        }
         binding.btnVisualizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,6 +66,13 @@ public class MainActivity extends AppCompatActivity {
                 .create(OMDBService.class);
 
         binding.btnBuscar.setOnClickListener(view -> fetchMovieDetailsWs());
+
+        primeNumberService = new Retrofit.Builder()
+                .baseUrl("https://prime-number-api.onrender.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(PrimeNumberService.class);
+        binding.btnVisualizar.setOnClickListener(view -> fetchPrimeFromWs());
     }
 
     public void fetchMovieDetailsWs(){
@@ -69,22 +91,27 @@ public class MainActivity extends AppCompatActivity {
                         String generos = dtoMovie.getGenre();
                         String escritores = dtoMovie.getWriter();
                         String trama = dtoMovie.getPlot();
-                        List<DtoRatings> listRatings = dtoMovie.getRatings();
+                        List<DtoRatings> ratingsList = dtoMovie.getRatings();
 
-                        String ratingIMDB = "";
-                        String ratingRottenTomatoes = "";
-                        String ratingMetacritic = "";
+                        String ratingIMDB = null;
+                        String ratingRottenTomatoes = null;
+                        String ratingMetacritic = null;
 
-                        for(DtoRatings rating : listRatings) {
+                        // Recorrer la lista de calificaciones
+                        for (DtoRatings rating : ratingsList) {
                             String source = rating.getSource();
-                            if (source != null) { // Verificar si la cadena source no es nula
-                                if(source.equals("Internet Movie Database")) {
-                                    ratingIMDB = rating.getValue();
-                                } else if(source.equals("Rotten Tomatoes")) {
-                                    ratingRottenTomatoes = rating.getValue();
-                                } else if(source.equals("Metacritic")) {
-                                    ratingMetacritic = rating.getValue();
-                                }
+                            String value = rating.getValue();
+
+                            // Determinar la fuente de la calificación y almacenar el valor correspondiente
+                            if (source.equals("Internet Movie Database")) {
+                                ratingIMDB = value;
+                                Log.d("rating",ratingIMDB);
+                            } else if (source.equals("Rotten Tomatoes")) {
+                                ratingRottenTomatoes = value;
+                                Log.d("rating",ratingRottenTomatoes);
+                            } else if (source.equals("Metacritic")) {
+                                ratingMetacritic = value;
+                                Log.d("rating",ratingMetacritic);
                             }
                         }
 
@@ -113,6 +140,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void fetchPrimeFromWs() {
+        if (tengoInternet()) {
+            primeNumberService.getPrimes(999, 1).enqueue(new Callback<List<DtoPrime>>() {
+                @Override
+                public void onResponse(Call<List<DtoPrime>> call, Response<List<DtoPrime>> response) {
+                    if (response.isSuccessful()) {
+                        primes = response.body();
+                        // Convertir la lista de DtoPrime a una cadena de texto utilizando Gson
+                        Gson gson = new Gson();
+                        String primesAsString = gson.toJson(primes);
+
+                        // Crear el Intent y pasar la cadena de primos como extra
+                        Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+                        intent.putExtra("primesAsString", primesAsString);
+                        startActivity(intent);
+                    } else {
+                        Log.d("msg-test", "Respuesta no exitosa al obtener primos: " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<DtoPrime>> call, Throwable t) {
+                    t.printStackTrace();
+                    Log.d("msg-test", "Falla al obtener primos");
+                }
+            });
+        }
+    }
+
+    // Método para convertir la lista de DtoPrime a una cadena de texto
+    private String convertDtoPrimesToString(List<DtoPrime> primes) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (DtoPrime prime : primes) {
+            stringBuilder.append(prime.toString()).append("\n");
+        }
+        return stringBuilder.toString();
+    }
+
+
     public boolean tengoInternet() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -123,4 +189,5 @@ public class MainActivity extends AppCompatActivity {
 
         return tieneInternet;
     }
+
 }

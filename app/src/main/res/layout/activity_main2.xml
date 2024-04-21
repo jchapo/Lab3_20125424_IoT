@@ -21,27 +21,6 @@
         android:background="@android:color/darker_gray"/>
 
     <!-- Espacio 1 -->
-    <LinearLayout
-        android:id="@+id/layoutBoton"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:layout_weight="1"
-        android:visibility="visible"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnIniciarPrimo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Iniciar Contador"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#00FF00"
-            android:layout_gravity="center"/>
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutMostrarPrimo"
@@ -49,7 +28,7 @@
         android:layout_height="0dp"
         android:layout_margin="16dp"
         android:layout_weight="1"
-        android:visibility="gone"
+        android:visibility="visible"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 

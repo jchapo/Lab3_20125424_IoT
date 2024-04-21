@@ -34,8 +34,9 @@ public class DtoMovie {
     private String awards;
     @SerializedName("Poster")
     private String poster;
+    @SerializedName("Ratings")
+    private List<DtoRatings> ratings;
 
-    private List<DtoRatings> Ratings;
     @SerializedName("Metascore")
     private String metascore;
     @SerializedName("imdbRating")
@@ -66,11 +67,11 @@ public class DtoMovie {
     }
 
     public List<DtoRatings> getRatings() {
-        return Ratings;
+        return ratings;
     }
 
-    public void setRatings(List<DtoRatings> Ratings) {
-        this.Ratings = Ratings;
+    public void setRatings(List<DtoRatings> ratings) {
+        this.ratings = ratings;
     }
 
     public String getYear() {

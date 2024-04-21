@@ -5,6 +5,9 @@ public class DtoPrime {
     private int number;
     private int order;
 
+    public DtoPrime(int primeNumber) {
+    }
+
     public int getNumber() {
         return number;
     }

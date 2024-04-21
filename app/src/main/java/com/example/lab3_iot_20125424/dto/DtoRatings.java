@@ -1,9 +1,13 @@
 package com.example.lab3_iot_20125424.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class DtoRatings {
+    @SerializedName("Source")
     private String source;
+    @SerializedName("Value")
     private String value;
 
     public String getSource() {
